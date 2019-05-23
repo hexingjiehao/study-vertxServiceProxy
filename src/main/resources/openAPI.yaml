@@ -1,0 +1,12 @@
+openapi: "3.0.1"
+info:
+  version: 1.0.0
+  title: 测试路由工厂的使用
+paths:
+  /hello:
+    get:
+      summary: 打印Hello,world
+      operationId: sayHello
+      responses:
+        '200':
+          description: 返回一个Json对象。
