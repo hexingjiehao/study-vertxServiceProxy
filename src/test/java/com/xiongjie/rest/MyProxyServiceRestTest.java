@@ -32,10 +32,6 @@ public class MyProxyServiceRestTest {
                 deploymentVerticleIds.add(ar2);
             }));
         }));
-
-        vertx.deployVerticle(MyproxyVerticle::new, new DeploymentOptions(), context.asyncAssertSuccess(ar -> {
-            deploymentVerticleIds.add(ar);
-        }));
     }
 
     @After

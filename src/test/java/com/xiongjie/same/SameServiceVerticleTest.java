@@ -1,6 +1,5 @@
-package com.xiongjie.rest;
+package com.xiongjie.same;
 
-import com.xiongjie.discovery.ServicePublic;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -19,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 @RunWith(VertxUnitRunner.class)
-public class WebClientTest {
+public class SameServiceVerticleTest {
 
     private Vertx vertx;
     private final Collection<String> deploymentVerticleIds = new ArrayList<>();
@@ -27,7 +26,7 @@ public class WebClientTest {
     @Before
     public void init(TestContext context) {
         vertx = Vertx.vertx();
-        vertx.deployVerticle(ServicePublic::new, new DeploymentOptions(), context.asyncAssertSuccess(ar -> {
+        vertx.deployVerticle(SameServiceVerticle::new, new DeploymentOptions(), context.asyncAssertSuccess(ar -> {
             deploymentVerticleIds.add(ar);
         }));
     }
@@ -46,13 +45,14 @@ public class WebClientTest {
     }
 
     @Test
-    public void webClientTest(TestContext context) {
+    public void sameServiceTest(TestContext context) {
         Async async = context.async();
         Vertx vertx=Vertx.vertx();
         WebClient client = WebClient.create(vertx);
-        client.get(8883,"localhost","/").send(ar ->{
+        client.get(8881,"localhost","/").send(ar ->{
             System.out.println(ar.result().body());
             async.complete();
         });
     }
+
 }
