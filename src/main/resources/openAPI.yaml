@@ -7,6 +7,9 @@ paths:
     get:
       summary: 打印Hello,world
       operationId: sayHello
+      security:
+        - oauth2: [material:read]
       responses:
         '200':
           description: 返回一个Json对象。
+
