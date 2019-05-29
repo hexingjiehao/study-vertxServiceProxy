@@ -1,11 +1,11 @@
 package com.xiongjie.kafka;
 
 import io.vertx.core.Vertx;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.kafka.client.consumer.KafkaConsumer;
-import io.vertx.kafka.client.producer.KafkaProducer;
-import io.vertx.kafka.client.producer.KafkaProducerRecord;
+import io.vertx.kafka.admin.KafkaAdminClient;
+import io.vertx.kafka.admin.NewTopic;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -18,48 +18,27 @@ public class KafkaClientTest {
 
     @Test
     public void kafkaClientTest(TestContext context) {
-        vertx =Vertx.vertx();
-        Map<String, String> config = new HashMap<>();
-        config.put("bootstrap.servers", "localhost:9092");
-        config.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        config.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        config.put("group.id", "my_group");
-        config.put("auto.offset.reset", "earliest");
-        config.put("enable.auto.commit", "false");
+        Async async = context.async();
 
-        KafkaConsumer<String, String> consumer = KafkaConsumer.create(vertx, config);
-        consumer.handler(record ->{
-            System.out.println(record.headers());
-            System.out.println(record.key());
-            System.out.println(record.offset());
-            System.out.println(record.partition());
-            System.out.println(record.record());
-            System.out.println(record.timestampType());
-            System.out.println(record.topic());
-            System.out.println(record.value());
-        });
+        Vertx vertx = Vertx.vertx();
 
-        consumer.subscribe("a-single-topic",ar ->{
-            if(ar.succeeded()){
-                System.out.println("消息接收成功！");
-            }else{
-                System.out.println("消息接收失败！");
+        Properties properties = new Properties();
+        properties.put("bootstrap.servers", "localhost:9092");
+        properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+        KafkaAdminClient kafkaAdminClient = KafkaAdminClient.create(vertx, properties);
+        List<NewTopic> topicList=new ArrayList<>();
+        topicList.add(new NewTopic("mytopic",0, (short) 1));
+
+        kafkaAdminClient.createTopics(topicList, ar -> {
+            if (ar.succeeded()) {
+                System.out.println("topic创建成功");
+            } else {
+                System.out.println("topic创建失败");
             }
+            vertx.close();
+            async.complete();
         });
-
-        Map<String, String> pconfig = new HashMap<>();
-        pconfig.put("bootstrap.servers", "localhost:9092");
-        pconfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        pconfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        pconfig.put("acks", "1");;
-
-        KafkaProducer<String, String> producer = KafkaProducer.create(vertx, pconfig);;
-        for (int i = 0; i < 5; i++) {
-            KafkaProducerRecord<String, String> record = KafkaProducerRecord.create("a-single-topic", "发送消息：" + i);
-            producer.write(record,ar ->{
-                System.out.println("ok");
-            });
-        }
     }
-
 }
